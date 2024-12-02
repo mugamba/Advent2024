@@ -21,30 +21,103 @@ foreach (var line in lines)
 var counter = 0;
 foreach (var list in input)
 {
-    Boolean? rising = null; Boolean isSafe = false;  
+    Boolean? rising = null; int breakingIndex = -1;  
     for (var i = 1; i < list.Count; i++)
     {
         var diff = list[i] - list[i - 1];
+        if (diff == 0)
+        {
+            breakingIndex = i;
+            break;
+        }
+        if (rising.HasValue && rising.Value == true && diff < 0)
+        {
+            breakingIndex = i;
+            break;
+        }
+        if (rising.HasValue && rising.Value == false && diff > 0)
+        {
+            breakingIndex = i;
+            break;
+        }
+        if (Math.Abs(diff) > 3)
+        {
+            breakingIndex = i;
+            break;
+        }
+
         if (rising == null)
         {
             if (diff < 0)
                 rising = false;
-            else
+
+            if (diff > 0)
                 rising = true;
+
         }
 
-        if (rising)
-    } 
-    
+    }
 
-    
+    if (breakingIndex == -1)
+    { 
+        counter++;
+        continue;
+    }
 
+    var count = list.Count;
+    for (var j = 0; j < count; j++)
+    {
+        var listCopy = list.ToList();
+        listCopy.RemoveAt(j);
+        rising = null; breakingIndex = -1;
+        for (var i = 1; i < listCopy.Count; i++)
+        {
+            var diff = listCopy[i] - listCopy[i - 1];
+            if (diff == 0)
+            {
+                breakingIndex = i;
+                break;
+            }
+            if (rising.HasValue && rising.Value == true && diff < 0)
+            {
+                breakingIndex = i;
+                break;
+            }
+            if (rising.HasValue && rising.Value == false && diff > 0)
+            {
+                breakingIndex = i;
+                break;
+            }
+            if (Math.Abs(diff) > 3)
+            {
+                breakingIndex = i;
+                break;
+            }
+
+            if (rising == null)
+            {
+                if (diff < 0)
+                    rising = false;
+
+                if (diff > 0)
+                    rising = true;
+
+            }
+
+        }
+
+        if (breakingIndex == -1)
+        {
+            counter++;
+            break;
+            
+        }
+
+    }
 
 }
 
-var result = diffs.Where(o => (o.All(g => g > 0) || o.All(g => g < 0)) && o.All(g => Math.Abs(g) <= 3))
-    .ToList().Count();
 
 /*Suma svih elemenata liste*/
-Console.WriteLine(result);
+Console.WriteLine(counter);
 Console.ReadKey();
