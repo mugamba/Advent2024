@@ -27,7 +27,7 @@ internal class Program
                 _matrix[i, j] = lines[i].ToCharArray()[j];
 
 
-        var counter = 0;List<Point> pointsOfA = new List<Point>();
+        List<Point> pointsOfA = new List<Point>();
         /*Skupljamo sve točke gdje se nalazi A u dijagonalnim ispisima "SAM" */
         for (int i = 0; i < _x; i++)
             for (int j = 0; j < _y; j++)
@@ -54,7 +54,8 @@ internal class Program
         /*Gdje imamo da je ista A točka više od jednom to je X*/
         var groupedByA = pointsOfA.GroupBy(o => o)
             .Select(g => new { PointOfA = g.Key, Counter = g.Count() }).ToList();
-        Console.WriteLine(groupedByA.Where(o=>o.Counter > 1).Count());
+        var result = groupedByA.Where(g => g.Counter > 1).Count();
+        Console.WriteLine(result);
         Console.ReadKey();
     }
 
