@@ -16,8 +16,6 @@ internal class Program
 
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
-
         var lines = File.ReadAllLines("input.txt");
         _x = lines.Length;
         _y = lines[0].Length;
@@ -30,6 +28,7 @@ internal class Program
 
 
         var counter = 0;List<Point> pointsOfA = new List<Point>();
+        /*Skupljamo sve točke gdje se nalazi A u dijagonalnim ispisima "SAM" */
         for (int i = 0; i < _x; i++)
             for (int j = 0; j < _y; j++)
             {
@@ -52,11 +51,10 @@ internal class Program
 
             }
 
-        var count = pointsOfA.Distinct();
-
-        var test = pointsOfA.GroupBy(o => o).Select(g => new { A = g.Key, Broj = g.Count() }).ToList();
-        /*Suma svih elemenata liste*/
-        Console.WriteLine(test.Where(o=>o.Broj > 1).Count());
+        /*Gdje imamo da je ista A točka više od jednom to je X*/
+        var groupedByA = pointsOfA.GroupBy(o => o)
+            .Select(g => new { PointOfA = g.Key, Counter = g.Count() }).ToList();
+        Console.WriteLine(groupedByA.Where(o=>o.Counter > 1).Count());
         Console.ReadKey();
     }
 
