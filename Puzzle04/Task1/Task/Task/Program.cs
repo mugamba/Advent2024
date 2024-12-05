@@ -15,8 +15,6 @@ internal class Program
 
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
-
         var lines = File.ReadAllLines("input.txt");
         _x = lines.Length;
         _y = lines[0].Length;
@@ -54,235 +52,85 @@ internal class Program
         Console.ReadKey();
     }
 
-    private static Boolean IsInsideMatrix(int i, int j)
+    private static Boolean CharacterOnPosition(int i, int j, char c)
     {
         if (i < 0 || j < 0)
             return false;
         if (i > _x - 1 || j > _y - 1)
             return false;
+        if (_matrix[i, j] != c)
+            return false;
+        
         return true;
     }
 
     private static Boolean CheckLeft(int i, int j)
     {
-        var nextIndexX = 0; var nextIndexY = 0;
-        if (_matrix[i, j] != 'X')
-            return false;
-
-        nextIndexX = i; nextIndexY = j + 1;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'M')
-            return false;
-
-        nextIndexX = i;  nextIndexY = j + 2;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'A')
-            return false;
-
-        nextIndexX = i;nextIndexY = j + 3;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'S')
-            return false;
-
-        return true;
+        return CharacterOnPosition(i, j, 'X') &&
+            CharacterOnPosition(i, j+1, 'M') &&
+            CharacterOnPosition(i, j+2, 'A') &&
+            CharacterOnPosition(i, j+3, 'S');
     }
 
     private static Boolean CheckRight(int i, int j)
     {
-        var nextIndexX = 0; var nextIndexY = 0;
-        if (_matrix[i, j] != 'X')
-            return false;
-
-        nextIndexX = i; nextIndexY = j-1;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'M')
-            return false;
-
-        nextIndexX = i; nextIndexY = j-2;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'A')
-            return false;
-
-        nextIndexX = i; nextIndexY = j-3;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'S')
-            return false;
-
-        return true;
-
+        return CharacterOnPosition(i, j, 'X') &&
+            CharacterOnPosition(i, j - 1, 'M') &&
+            CharacterOnPosition(i, j - 2, 'A') &&
+            CharacterOnPosition(i, j - 3, 'S');
     }
 
     private static Boolean CheckUp(int i, int j)
     {
-        var nextIndexX = 0; var nextIndexY = 0;
-        if (_matrix[i, j] != 'X')
-            return false;
-
-        nextIndexX = i-1; nextIndexY = j;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'M')
-            return false;
-
-        nextIndexX = i-2; nextIndexY = j;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'A')
-            return false;
-
-        nextIndexX = i-3; nextIndexY = j;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'S')
-            return false;
-
-        return true;
+        return CharacterOnPosition(i, j, 'X') &&
+            CharacterOnPosition(i-1, j, 'M') &&
+            CharacterOnPosition(i-2, j, 'A') &&
+            CharacterOnPosition(i-3, j, 'S');
 
     }
 
     private static Boolean CheckDown(int i, int j)
     {
-        var nextIndexX = 0; var nextIndexY = 0;
-        if (_matrix[i, j] != 'X')
-            return false;
-
-        nextIndexX = i + 1; nextIndexY = j;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'M')
-            return false;
-
-        nextIndexX = i + 2; nextIndexY = j;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'A')
-            return false;
-
-        nextIndexX = i + 3; nextIndexY = j;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'S')
-            return false;
-
-        return true;
+        return CharacterOnPosition(i, j, 'X') &&
+            CharacterOnPosition(i + 1, j, 'M') &&
+            CharacterOnPosition(i + 2, j, 'A') &&
+            CharacterOnPosition(i + 3, j, 'S');
 
     }
 
     private static Boolean CheckUpRight(int i, int j)
     {
-        var nextIndexX = 0; var nextIndexY = 0;
-        if (_matrix[i, j] != 'X')
-            return false;
-
-        nextIndexX = i - 1; nextIndexY = j+1;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'M')
-            return false;
-
-        nextIndexX = i - 2; nextIndexY = j + 2;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'A')
-            return false;
-
-        nextIndexX = i - 3; nextIndexY = j + 3;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'S')
-            return false;
-
-        return true;
+        return CharacterOnPosition(i, j, 'X') &&
+            CharacterOnPosition(i - 1, j -1, 'M') &&
+            CharacterOnPosition(i - 2, j -2, 'A') &&
+            CharacterOnPosition(i - 3, j-3, 'S');
 
     }
 
     private static Boolean CheckUpLeft(int i, int j)
     {
-        var nextIndexX = 0; var nextIndexY = 0;
-        if (_matrix[i, j] != 'X')
-            return false;
-
-        nextIndexX = i - 1; nextIndexY = j - 1;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'M')
-            return false;
-
-        nextIndexX = i - 2; nextIndexY = j - 2;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'A')
-            return false;
-
-        nextIndexX = i - 3; nextIndexY = j - 3;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'S')
-            return false;
-
-        return true;
+        return CharacterOnPosition(i, j, 'X') &&
+           CharacterOnPosition(i - 1, j + 1, 'M') &&
+           CharacterOnPosition(i - 2, j + 2, 'A') &&
+           CharacterOnPosition(i - 3, j + 3, 'S');
 
     }
 
     private static Boolean CheckDownLeft(int i, int j)
     {
-        var nextIndexX = 0; var nextIndexY = 0;
-        if (_matrix[i, j] != 'X')
-            return false;
-
-        nextIndexX = i + 1; nextIndexY = j - 1;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'M')
-            return false;
-
-        nextIndexX = i + 2; nextIndexY = j - 2;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'A')
-            return false;
-
-        nextIndexX = i + 3; nextIndexY = j - 3;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'S')
-            return false;
-
-        return true;
+        return CharacterOnPosition(i, j, 'X') &&
+          CharacterOnPosition(i + 1, j + 1, 'M') &&
+          CharacterOnPosition(i + 2, j + 2, 'A') &&
+          CharacterOnPosition(i + 3, j + 3, 'S');
 
     }
 
     private static Boolean CheckDownRight(int i, int j)
     {
-        var nextIndexX = 0; var nextIndexY = 0;
-        if (_matrix[i, j] != 'X')
-            return false;
-
-        nextIndexX = i + 1; nextIndexY = j + 1;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'M')
-            return false;
-
-        nextIndexX = i + 2; nextIndexY = j + 2;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'A')
-            return false;
-
-        nextIndexX = i + 3; nextIndexY = j + 3;
-        if (!IsInsideMatrix(nextIndexX, nextIndexY))
-            return false;
-        if (_matrix[nextIndexX, nextIndexY] != 'S')
-            return false;
-
-        return true;
+        return CharacterOnPosition(i, j, 'X') &&
+          CharacterOnPosition(i +1, j - 1, 'M') &&
+          CharacterOnPosition(i + 2, j - 2, 'A') &&
+          CharacterOnPosition(i + 3, j - 3, 'S');
 
     }
 
