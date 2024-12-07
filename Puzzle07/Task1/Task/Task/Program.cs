@@ -38,13 +38,13 @@ internal class Program
         Console.ReadKey();
     }
 
-    private static Boolean TestLine(long key, List<long> elements, int index, long currentelement)
+    private static Boolean TestLine(long key, List<long> elements, int index, long currentlyCalculated)
     {
         if (elements.Count - 1 == index)
-            return key == currentelement;
+            return key == currentlyCalculated;
 
-        return TestLine(key, elements, index + 1, currentelement * elements[index + 1])
-            || TestLine(key, elements, index + 1, currentelement + elements[index + 1]);
+        return TestLine(key, elements, index + 1, currentlyCalculated * elements[index + 1])
+            || TestLine(key, elements, index + 1, currentlyCalculated + elements[index + 1]);
             
 
     }
