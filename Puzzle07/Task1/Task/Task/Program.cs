@@ -46,6 +46,5 @@ internal class Program
         return TestLine(key, elements, index + 1, currentlyCalculated * elements[index + 1])
             || TestLine(key, elements, index + 1, currentlyCalculated + elements[index + 1]);
             
-
     }
 }

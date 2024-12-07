@@ -33,20 +33,19 @@ internal class Program
             if (TestLine(line.Item1, line.Item2, 0, line.Item2[0]))
                 sum = sum + line.Item1;
         }
-      
-
         Console.WriteLine(sum);
         Console.ReadKey();
+
     }
 
-    private static Boolean TestLine(long key, List<long> elements, int index, long currentelement)
+    private static Boolean TestLine(long key, List<long> elements, int index, long currentlyCalculated)
     {
         if (elements.Count - 1 == index  ) 
-            return key == currentelement;
+            return key == currentlyCalculated;
 
-        return TestLine(key, elements, index + 1, currentelement * elements[index + 1])
-            || TestLine(key, elements, index + 1, currentelement + elements[index + 1])
-            || TestLine(key, elements, index + 1, long.Parse(currentelement.ToString() + elements[index + 1].ToString()));
+        return TestLine(key, elements, index + 1, currentlyCalculated* elements[index + 1])
+            || TestLine(key, elements, index + 1, currentlyCalculated+ elements[index + 1])
+            || TestLine(key, elements, index + 1, long.Parse(currentlyCalculated.ToString() + elements[index + 1].ToString()));
 
     }
 
