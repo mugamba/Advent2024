@@ -26,7 +26,7 @@ internal class Program
                 _line[long.Parse(line)]++;
         }
 
-        for(var i = 0; i < 25; i++)
+        for(var i = 0; i < 75; i++)
         {
             DoBlink();
         }
