@@ -35,34 +35,43 @@ internal class Program
             }
         }
 
-        var anyMoved = true;
-        while (_nonEmptyPos.Where(o => o.Value.Item3 == false).Count() > 0 && anyMoved)
-        {
-            var maxKey = _nonEmptyPos.Where(o => o.Value.Item3 == false).Max(o => o.Key);
-            var element = _nonEmptyPos[maxKey];
 
-            anyMoved = false;
-            
-                var dict = _nonEmptyPos.OrderBy(o => o.Key).ToDictionary();
-                for (int i=0;i<dict.Count-1;i++)
+
+        var anyToMove = true;
+        while (anyToMove)
+        {
+            var toMove = _nonEmptyPos.Where(o => o.Value.Item3 == false).Select(o=>o.Key);
+            var test = toMove.Count();
+            anyToMove = toMove.Count() > 0;
+
+            if (anyToMove)
+            {
+
+                var maxKey = toMove.Max(o => o);
+                var element = _nonEmptyPos[maxKey];
+                var dict = _nonEmptyPos.OrderBy(o => o.Key).Select(o=>o.Key).ToArray();
+                var moved = false;
+                for (int i = 0; i < dict.Length; i++)
                 {
                     var gapsize = element.Item2;
-                    var tuple1 = dict.ElementAt(i);
-                    if (maxKey <= tuple1.Key)
+                    var tuple1 = _nonEmptyPos[dict[i]];
+                    if (maxKey <= dict[i])
                         continue;
-                    
-                    var tuple2 = dict.ElementAt(i+1);
-                    if (gapsize <= tuple2.Key - (tuple1.Key + tuple1.Value.Item2))
+
+                    var tuple2 = _nonEmptyPos[dict[i+1]];
+                    if (gapsize <= dict[i + 1] - (dict[i] + tuple1.Item2))
                     {
-                       var removed =  _nonEmptyPos.Remove(maxKey);
-                        _nonEmptyPos.Add(tuple1.Key + tuple1.Value.Item2,
+                        var removed = _nonEmptyPos.Remove(maxKey);
+                        _nonEmptyPos.Add(dict[i] + tuple1.Item2,
                             Tuple.Create(element.Item1, element.Item2, true));
-                        anyMoved = true;
+                        moved = true;
                         break;
                     }
                 }
 
-                element = Tuple.Create(element.Item1, element.Item2, true);
+                if (!moved)
+                    _nonEmptyPos[maxKey] = Tuple.Create(element.Item1, element.Item2, true);
+            }
         }
         
 
