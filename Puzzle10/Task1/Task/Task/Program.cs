@@ -43,12 +43,10 @@ internal class Program
         var sum = 0;
         foreach (var value in _trailHeads.Values)
         {
-            sum = sum + value.Count();
+            sum = sum + value.Distinct().Count();
         
         }
-
-        /*Suma svih elemenata liste*/
-        Console.WriteLine();
+        Console.WriteLine(sum);
         Console.ReadKey();
     }
 
