@@ -13,7 +13,7 @@ internal class Program
     static int _x;
     static int _y;
     static Dictionary<Tuple<char, Point>, List<Point>> _regions = new Dictionary<Tuple<char, Point>, List<Point>>();
-    
+
 
     static void Main(string[] args)
     {
@@ -43,14 +43,10 @@ internal class Program
             }
 
         var sum = 0;
-        foreach(var region in _regions) 
+        foreach (var region in _regions)
         {
-
-            NumberOfSides(region.Value);
-
-
+            sum += region.Value.Count() * NumberOfSides(region.Value);
         }
-
 
         Console.WriteLine(sum);
         Console.ReadKey();
@@ -69,16 +65,16 @@ internal class Program
             _regions[key].Add(new Point(i, j));
         else
             return;
-                    
 
-        if (i - 1 >= 0 && _matrix[i - 1, j] == key.Item1 )
+
+        if (i - 1 >= 0 && _matrix[i - 1, j] == key.Item1)
             CrawlRegion(key, i - 1, j);
 
         if (i + 1 < _x && _matrix[i + 1, j] == key.Item1)
             CrawlRegion(key, i + 1, j);
 
-        if (j - 1 >= 0 && _matrix[i, j-1] == key.Item1)
-            CrawlRegion(key, i, j-1);
+        if (j - 1 >= 0 && _matrix[i, j - 1] == key.Item1)
+            CrawlRegion(key, i, j - 1);
 
         if (j + 1 < _y && _matrix[i, j + 1] == key.Item1)
             CrawlRegion(key, i, j + 1);
@@ -93,54 +89,133 @@ internal class Program
         var minY = regions.Select(o => o.Y).Min();
         var maxY = regions.Select(o => o.Y).Max();
 
-        var nortshSide = new List<Point>();
-        var southSide = new List<Point>();
-        var westSide = new List<Point>();
-        var eastSide = new List<Point>();
+        var verticalComingIn = new List<Point>();
+        var verticalComingOut = new List<Point>();
+        var horizontalcomingIn = new List<Point>();
+        var horizontalgoingout = new List<Point>();
 
-        for (var i = minX; i <= maxX; i++)
+        for (var i = minX - 1; i <= maxX + 1; i++)
         {
             var isInside = false;
-            for (var j = minY - 1; j < maxY + 1; j++)
+            for (var j = minY - 1; j <= maxY + 1; j++)
             {
-                if (regions.Contains(new Point(i, j)) && isInside == false )
+                if (regions.Contains(new Point(i, j)) && !isInside)
                 {
                     isInside = true;
-                    westSide.Add(new Point(i, j));
+                    horizontalcomingIn.Add(new Point(i, j));
                 }
 
-                if (!regions.Contains(new Point(i, j)) && isInside == true)
+                if (!regions.Contains(new Point(i, j)) && isInside)
                 {
                     isInside = false;
-                    eastSide.Add(new Point(i, j-1));
+                    horizontalgoingout.Add(new Point(i, j));
                 }
             }
         }
 
-        var previous = westSide.First();
-        var counter = 1;
-        foreach (var region in westSide)
-        {   
-            previous   
-            
+
+
+        for (var j = minY - 1; j <= maxY + 1; j++)
+        {
+            var isInside = false;
+            for (var i = minX - 1; i <= maxX + 1; i++)
+            {
+                if (regions.Contains(new Point(i, j)) && !isInside)
+                {
+                    isInside = true;
+                    verticalComingIn.Add(new Point(i, j));
+                }
+
+                if (!regions.Contains(new Point(i, j)) && isInside)
+                {
+                    isInside = false;
+                    verticalComingOut.Add(new Point(i, j));
+                }
+            }
+
         }
 
-        //for (var j = minY; j <= maxY; j++)
-        //{
-        //    for (var i = minX; i < maxX; i++)
-        //    {
-        //        if (regions.Contains(new Point(i, j)))
-        //            westSide.Add(new Point(i, j));
-        //    }
-        //    for (var i = maxX; i >= minX; i--)
-        //    {
-        //        if (regions.Contains(new Point(i, j)))
-        //            eastSide.Add(new Point(i, j));
-        //    }
-        //}
+        var distinctYin = horizontalcomingIn.Select(o => o.Y).Distinct();
+        var distinctYout = horizontalgoingout.Select(o => o.Y).Distinct();
 
-        return 0;
+        int counter1 = 0;
+        foreach (var y in distinctYin)
+        {
+            var list = horizontalcomingIn.Where(o => o.Y == y).Select(o => o.X);
+            var previous = list.First();
+            counter1++;
+            foreach (var x in list)
+            {
+                if (x == previous)
+                    continue;
+                
+                if (previous + 1 != x)
+                    counter1++;
 
+                previous = x;
+            }
+
+        }
+
+        foreach (var y in distinctYout)
+        {
+            var list = horizontalgoingout.Where(o => o.Y == y).Select(o => o.X);
+            var previous = list.First();
+            counter1++;
+            foreach (var x in list)
+            {
+                if (x == previous)
+                    continue;
+
+                if (previous + 1 != x)
+                    counter1++;
+
+                previous = x;
+            }
+
+        }
+
+        var distinctXin = verticalComingIn.Select(o => o.X).Distinct();
+        var distinctXout = verticalComingOut.Select(o => o.X).Distinct();
+
+        foreach (var x in distinctXin)
+        {
+            var list = verticalComingIn.Where(o => o.X == x).Select(o => o.Y);
+            var previous = list.First();
+            counter1++;
+            foreach (var y in list)
+            {
+                if (y == previous)
+                    continue;
+
+                if (previous + 1 != y)
+                    counter1++;
+
+                previous = y;
+            }
+
+        }
+
+        foreach (var x in distinctXout)
+        {
+            var list = verticalComingOut.Where(o => o.X == x).Select(o => o.Y);
+            var previous = list.First();
+            counter1++;
+            foreach (var y in list)
+            {
+                if (y == previous)
+                    continue;
+
+                if (previous + 1 != y)
+                    counter1++;
+
+                previous = y;
+            }
+
+        }
+
+        return counter1;
+        
     }
 
 }
