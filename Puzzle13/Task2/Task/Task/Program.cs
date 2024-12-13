@@ -82,20 +82,20 @@ internal class Program
         var matchesX =new List<int>();
         var matchesY = new List<int>();
 
-        for (int i = 0; i < 1000; i++)
+        for (int i = 0; i < 10000; i++)
         {
             if ((ct.PrizePositionX - i * ct.ButtonAXOffset) % ct.ButtonBXOffset == 0)
             {
                 //   var inty = (ct.PrizePositionX - i * ct.ButtonAXOffset) / ct.ButtonBXOffset;
                 matchesX.Add(i);
-                if (matchesX.Count > 30 && matchesY.Count > 30)
+                if (matchesX.Count > 50 && matchesY.Count > 50)
                     break;
 
             }
             if ((ct.PrizePositionY - i * ct.ButtonAYOffset) % ct.ButtonBYOffset == 0)
             {
                 matchesY.Add(i);
-                if (matchesX.Count > 30 && matchesY.Count > 30)
+                if (matchesX.Count > 50 && matchesY.Count > 50)
                     break;
             }
         }
