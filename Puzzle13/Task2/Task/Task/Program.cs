@@ -12,7 +12,7 @@ using System.Text.RegularExpressions;
 internal class Program
 {
     public static List<Claw> _claws = new List<Claw>();
-    public static List<int> _wins = new List<int>();
+    public static List<long> _wins = new List<long>();
 
 
     static void Main(string[] args)
@@ -45,68 +45,53 @@ internal class Program
             {
                 var trimed = line.Replace("Prize:", "").Trim();
                 var xy = trimed.Split(", ");
-                claw.PrizePositionX = long.Parse(xy[0].Trim().Replace("X=", "").Trim());
-                claw.PrizePositionY = long.Parse(xy[1].Trim().Replace("Y=", "").Trim());
+                claw.PrizePositionX = 10000000000000L + long.Parse(xy[0].Trim().Replace("X=", "").Trim());
+                claw.PrizePositionY = 10000000000000L + long.Parse(xy[1].Trim().Replace("Y=", "").Trim());
 
             }
 
-
-
         }
 
-        _claws.Add(claw);
-
-        long intx = 1; long inty = 1;
-        var isTrue = false;
-
+        _claws.Add(claw);   
         foreach (var c in _claws)
         {
-
-            var test = c.PrizePositionX % c.ButtonAXOffset;
-            var test1 = c.PrizePositionX % c.ButtonBXOffset;
-
-            var test2 = c.PrizePositionY % c.ButtonAYOffset;
-            var test3 = c.PrizePositionY % c.ButtonBYOffset;
-
-
             TestLine(c);
         }
-
         Console.WriteLine(_wins.Sum());
         Console.ReadKey();
     }
 
 
-    public static Int64 TestLine(Claw ct)
+    public static void TestLine(Claw ct)
     {
-        var matchesX =new List<int>();
-        var matchesY = new List<int>();
 
-        for (int i = 0; i < 10000; i++)
-        {
-            if ((ct.PrizePositionX - i * ct.ButtonAXOffset) % ct.ButtonBXOffset == 0)
-            {
-                //   var inty = (ct.PrizePositionX - i * ct.ButtonAXOffset) / ct.ButtonBXOffset;
-                matchesX.Add(i);
-                if (matchesX.Count > 50 && matchesY.Count > 50)
-                    break;
+        var a1 = -ct.ButtonAYOffset * ct.ButtonBXOffset;
+        var r1 = -ct.ButtonAYOffset * ct.PrizePositionX;
 
-            }
-            if ((ct.PrizePositionY - i * ct.ButtonAYOffset) % ct.ButtonBYOffset == 0)
-            {
-                matchesY.Add(i);
-                if (matchesX.Count > 50 && matchesY.Count > 50)
-                    break;
-            }
-        }
+        var a2 = ct.ButtonAXOffset * ct.ButtonBYOffset;
+        var r2 = ct.ButtonAXOffset * ct.PrizePositionY;
 
-        foreach (var t in matchesX)
-        {
-            var test = t % 7;
+        var a = a1 + a2;
+        var r = r1 + r2;
 
-        }
+        if (r == 0 || a == 0)
+            return;
 
-        return 0;
+        if (r % a != 0)
+            return;
+
+        if (r / a < 0) 
+            return;
+
+            var resultB = r / a;
+            var test = (ct.PrizePositionX - resultB * ct.ButtonBXOffset) % ct.ButtonAXOffset;
+
+        if (test != 0)
+            return;
+
+        var resultA = (ct.PrizePositionX - resultB * ct.ButtonBXOffset) / ct.ButtonAXOffset;
+        _wins.Add(resultA * 3 + resultB);
+
     }
 
 
