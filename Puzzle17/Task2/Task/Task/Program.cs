@@ -1,9 +1,11 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 
 
@@ -14,66 +16,75 @@ internal class Program
     public static long RegisterC;
     public static List<long> _instructions = new List<long>();
     public static List<long> _output = new List<long>();
-
+    public static List<long> _digitsReversed = new List<long>();
+    public static List<long> _outputed = new List<long>();
 
     static void Main(string[] args)
     {
         var lines = File.ReadAllLines("input.txt");
-        
-        foreach (var line in lines) {
-
-            if (string.IsNullOrEmpty(line)) continue;
-
-            if (line.Contains("Register A:"))
-                RegisterA = long.Parse(line.Replace("Register A:", "").Trim());
-            if (line.Contains("Register B:"))
-                RegisterB = long.Parse(line.Replace("Register B:", "").Trim());
-            if (line.Contains("Register C:"))
-                RegisterC = long.Parse(line.Replace("Register C:", "").Trim());
-
-            if (line.Contains("Program:"))
-            {
-               var trimedLine = line.Replace("Program:", "").Trim();
-               var splits = trimedLine.Split(",");
-
-                foreach(var split in  splits)
-                {
-                    _instructions.Add(long.Parse(split));
-                }
-
-                
-            }
-        }
-
-        var inPoint = 0;
-
-        while (inPoint < _instructions.Count)
+        var lineWithoutRepatingAndDivA = "2,4,1,1,7,5,1,5,4,0,5,5";
+        var originalLine = "2,4,1,1,7,5,1,5,4,0,5,5,0,3,3,0";
+        var splitor = originalLine.Split(",");
+      
+        foreach (var line in splitor)
         {
-            var instruction = _instructions[inPoint];
-            inPoint++;
-            var operand = _instructions[inPoint];
-            inPoint++;
-            if (instruction == 3)
-                if (RegisterA != 0)
-                    inPoint = (int)operand;
-                else
-                {
-                    continue;
-                }
-            else
-            {
-                GetOperation(instruction, operand);
-            }
-
+            _digitsReversed.Add(int.Parse(line));
 
         }
+        _digitsReversed.Reverse();
 
+        var trimedLine = lineWithoutRepatingAndDivA;
+        var splits = trimedLine.Split(",");
 
+        foreach (var split in splits)
+        {
+            _instructions.Add(int.Parse(split));
+        }
 
-        Console.WriteLine (String.Join(",", _output));
+        DoRecursion(0, 0);
+        Console.WriteLine();
         Console.ReadKey();
     }
 
+
+    public static void DoRecursion(int digitPos, long previousA)
+    {
+        if (digitPos == 16)
+        {
+            Console.WriteLine(previousA);
+            return;
+        }
+        
+        for (long i = previousA * 8; i < previousA * 8 + 8; i++)
+        {
+            RegisterA = i;
+            var inPoint = 0;
+            _output.Clear();
+            while (inPoint < _instructions.Count)
+            {
+                var instruction = _instructions[inPoint];
+                inPoint++;
+                var operand = _instructions[inPoint];
+                inPoint++;
+                if (instruction == 3)
+                    if (RegisterA != 0)
+                        inPoint = (int)operand;
+                    else
+                    {
+                        continue;
+                    }
+                else
+                {
+                    GetOperation(instruction, operand);
+                }
+            }
+
+            if (_output.First() == _digitsReversed[digitPos])
+            {
+                DoRecursion(digitPos + 1, i);
+            }
+        }
+    }
 
     public static long ComboOperand(long i)
     {
@@ -126,13 +137,13 @@ internal class Program
             case 6:
                 {
                     var number = ComboOperand(operand);
-                    RegisterB = RegisterA / (int)(Math.Pow(2, number));
+                    RegisterB = RegisterA / (long)(Math.Pow(2, number));
                     break;
                 }
             case 7:
                 {
                     var number = ComboOperand(operand);
-                    RegisterC = RegisterA / (int)(Math.Pow(2, number));
+                    RegisterC = RegisterA / (long)(Math.Pow(2, number));
                     break;
                 }
 

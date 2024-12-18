@@ -34,15 +34,11 @@ internal class Program
         _matrix = new char[_x, _y];
         var builder = new StringBuilder();
 
-
-
         for (int i = 0; i < _x; i++)
             for (int j = 0; j < _y; j++)
             {
                 var sign = linesField[i].ToCharArray()[j];
                 _matrix[i, j] = sign;
-
-
 
                 if (sign == 'S')
                 {
@@ -79,13 +75,11 @@ internal class Program
 
                     }
                 }
-
             }
 
         var startNode = new Node();
         startNode._distance = 0;
         _distances[_start] = startNode;
-
         var endNode = false;
 
         while (!endNode)
@@ -97,9 +91,7 @@ internal class Program
 
         }
 
-
         var result = _distances.Where(o => o.Key.Item1 == _end).OrderBy(o => o.Value._distance).FirstOrDefault();
-
         var next = result.Key;
         _shortestPath.Add(next, 0);
 
@@ -377,39 +369,7 @@ internal class Program
         }
 
         _visited.Add(pos, true);
-
     }
-
-
-    public static void printmap(int x, int y)
-    {
-        for (int i = 0; i < y; i++)
-        {
-            for (int j = 0; j < x; j++)
-            {
-                Console.Write(_matrix[i, j]);
-            }
-            Console.WriteLine();
-        }
-    }
-
-    public static long sumstones(int x, int y)
-    {
-        var sum = 0L;
-        for (int i = 0; i < y; i++)
-        {
-            for (int j = 0; j < x; j++)
-            {
-                if (_matrix[i, j] == 'O')
-                    sum = sum + 100 * i + j;
-            }
-
-        }
-
-        return sum;
-
-    }
-
     public class Node
     {
         public List<Tuple<Point, char>> _list = new List<Tuple<Point, char>>();
