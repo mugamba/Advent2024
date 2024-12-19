@@ -44,18 +44,14 @@ internal class Program
         {
             return 1;
         }
-
         if (_memo.ContainsKey(inputreduced))
         {
             return _memo[inputreduced]; 
         }
 
-
         var toTest = _towels.Where(o =>o.Key.Length <= inputreduced.Length &&  inputreduced.StartsWith(o.Key)).ToList();
-
         if (toTest.Count == 0)
             _memo.Add(inputreduced, 0);
-
 
         long sum = 0;
         foreach (var test in toTest)
@@ -67,8 +63,6 @@ internal class Program
 
             sum = sum + result;
         }
-
         return sum;
     }
-
 }
