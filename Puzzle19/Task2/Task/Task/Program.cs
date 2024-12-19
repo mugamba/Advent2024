@@ -1,12 +1,8 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 
 
 internal class Program
@@ -37,7 +33,6 @@ internal class Program
         Console.ReadKey();
     }
 
-
     public static long DoRecursion(string inputreduced)
     {
         if (inputreduced == "")
@@ -63,6 +58,9 @@ internal class Program
 
             sum = sum + result;
         }
+        if (_memo.ContainsKey(inputreduced))
+            _memo.Add(inputreduced, sum);
+        
         return sum;
     }
 }
