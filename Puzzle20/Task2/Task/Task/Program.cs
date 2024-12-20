@@ -16,13 +16,15 @@ internal class Program
     static char[,] _matrix;
     static int _x;
     static int _y;
-    static Dictionary<Point, Tuple<Point?, int>> _distances = new Dictionary<Point, Tuple<Point?, int>>();
+    static Dictionary<Point, int> _distances = new Dictionary<Point, int>();
+    static Dictionary<Point, int> _originalDistances = new Dictionary<Point, int>();
+    static Dictionary<Point, int> _distancesEmpty = new Dictionary<Point, int>();
+
+
     static Dictionary<Point, int> _blockades = new Dictionary<Point, int>();
-    static Dictionary<Point, int> _blockadesRemoving = new Dictionary<Point, int>();
     static Dictionary<Point, int> _visited = new Dictionary<Point, int>();
     static Dictionary<Point, int> _toVisit = new Dictionary<Point, int>();
-    static Dictionary<Point, int> _sparedPicoSeconds = new Dictionary<Point, int>();
-    static Dictionary<Tuple<Point, Point>, long> _help = new Dictionary<Tuple<Point, Point>, long>(); 
+    static Dictionary<Tuple<Point, Point>, int> _ustede = new Dictionary<Tuple<Point, Point>, int>();
 
 
     static Point _start;
@@ -45,7 +47,6 @@ internal class Program
 
             }
 
-
         for (int i = 0; i < _x; i++)
             for (int j = 0; j < _y; j++)
             {
@@ -54,7 +55,8 @@ internal class Program
                 if (sign == '#')
                     _blockades.Add(new Point(i, j), 0);
 
-                _distances.Add(new Point(i, j), Tuple.Create<Point?, int>(null, int.MaxValue));
+                _distances.Add(new Point(i, j), int.MaxValue);
+                _distancesEmpty.Add(new Point(i, j), int.MaxValue);
 
                 if (sign == 'S')
                     _start = new Point(i, j);
@@ -65,54 +67,70 @@ internal class Program
             }
 
 
-        DoDijkstra(new Point(-1, -1));
-        var minStartingTime = _distances[_end].Item2;
-        for (int i = 0; i < _x; i++)
-            for (int j = 0; j < _y; j++)
+        DoDijkstra();
+        var minStartingTime = _distances[_end];
+        foreach (var d in _distances)
+            _originalDistances.Add(d.Key, d.Value);
+
+       
+
+       foreach (var d in _originalDistances.Where(o => o.Value != int.MaxValue).OrderBy(o => o.Value))
+        {
+          
+            var points = _distancesEmpty.Where(o => Math.Abs(d.Key.X - o.Key.X) + Math.Abs(d.Key.Y - o.Key.Y) <= 20).Select(g => g.Key)
+                .ToList().Intersect(_originalDistances.Where(o => o.Value != int.MaxValue).Select(o=>o.Key).ToList());
+            
+            foreach (var p in points)
             {
-                var sign = _matrix[i, j];
-                if (sign == '.')
-                    _sparedPicoSeconds.Add(new Point(i, j), minStartingTime - DoDijkstra(new Point(i, j)));
+                var distance = Math.Abs(d.Key.X - p.X) + Math.Abs(d.Key.Y - p.Y);
 
+                //Console.WriteLine(distance);
+                //Console.WriteLine(d.Value + "  " + _originalDistances[p]);
+                if (_originalDistances[p] > d.Value)
+                {
+                    if ((_originalDistances[p] - d.Value) > distance )
+                    {
+                        //Console.WriteLine("Point({0}-{1}) -> Point({2}-{3})   -- ušteda {4}", d.Key.X, d.Key.Y,  p.X, p.Y, _originalDistances[p] - d.Value - distance );
+                        _ustede.Add(Tuple.Create(d.Key, p), _originalDistances[p] - d.Value - distance);
+                    }
+                }
             }
-
-
-
-        Console.WriteLine(_sparedPicoSeconds.Where(o => o.Value >= 100).Count());
+        }
+        Console.WriteLine(_ustede.Where(o=>o.Value >= 100).Count());
         Console.ReadKey();
     }
 
-    private static Tuple<Point, Point> DoDijkstra(Point startToCheat)
+    private static void DoDijkstra()
     {
         var endNode = false;
         foreach (var node in _distances)
         {
-            _distances[node.Key] = Tuple.Create<Point?, int>(null, int.MaxValue);
+            _distances[node.Key] = int.MaxValue;
         }
         _toVisit.Clear();
         _visited.Clear();
-        _distances[_start] = Tuple.Create<Point?, int>(null, 0);
+        _distances[_start] = 0; 
         _toVisit.Add(_start, 0);
 
         while (!endNode)
         {
             var toVisit = _toVisit.OrderBy(o => o.Value).Take(1).FirstOrDefault();
-            VisitNode(toVisit.Key, startToCheat);
+            VisitNode(toVisit.Key);
             endNode = _visited.Where(o => o.Key == _end).Any();
         }
-        return _distances[_end].Item2;
+        
     }
 
-    public static void VisitNode(Point pos, Point startToCheat)
+    public static void VisitNode(Point pos)
     {
-        var currrentdistance = _distances[pos].Item2;
+        var currrentdistance = _distances[pos];
         var newpoint = new Point(pos.X, pos.Y - 1);
         if (InBounds(newpoint))
-            if ((!_blockades.ContainsKey(newpoint) || pos == startToCheat) && !_visited.ContainsKey(newpoint))
+            if ((!_blockades.ContainsKey(newpoint)) && !_visited.ContainsKey(newpoint))
             {
-                if (_distances[newpoint].Item2 > currrentdistance + 1)
+                if (_distances[newpoint] > currrentdistance + 1)
                 {
-                    _distances[newpoint] = Tuple.Create<Point?, int>(pos, currrentdistance + 1);
+                    _distances[newpoint] =  currrentdistance + 1;
                     if (!_toVisit.ContainsKey(newpoint))
                         _toVisit.Add(newpoint, currrentdistance + 1);
                 }
@@ -120,12 +138,12 @@ internal class Program
 
         var newpoint1 = new Point(pos.X, pos.Y + 1);
         if (InBounds(newpoint1))
-            if ((!_blockades.ContainsKey(newpoint1) || pos == startToCheat) && !_visited.ContainsKey(newpoint1))
+            if (!_blockades.ContainsKey(newpoint1) && !_visited.ContainsKey(newpoint1))
             {
 
-                if (_distances[newpoint1].Item2 > currrentdistance + 1)
+                if (_distances[newpoint1] > currrentdistance + 1)
                 {
-                    _distances[newpoint1] = Tuple.Create<Point?, int>(pos, currrentdistance + 1);
+                    _distances[newpoint1] =  currrentdistance + 1;
                     if (!_toVisit.ContainsKey(newpoint1))
                         _toVisit.Add(newpoint1, currrentdistance + 1);
 
@@ -134,12 +152,12 @@ internal class Program
             }
         var newpoint2 = new Point(pos.X - 1, pos.Y);
         if (InBounds(newpoint2))
-            if ((!_blockades.ContainsKey(newpoint2) || pos == startToCheat) && !_visited.ContainsKey(newpoint2))
+            if ((!_blockades.ContainsKey(newpoint2)) && !_visited.ContainsKey(newpoint2))
             {
 
-                if (_distances[newpoint2].Item2 > currrentdistance + 1)
+                if (_distances[newpoint2] > currrentdistance + 1)
                 {
-                    _distances[newpoint2] = Tuple.Create<Point?, int>(pos, currrentdistance + 1);
+                    _distances[newpoint2] =  currrentdistance + 1;
                     if (!_toVisit.ContainsKey(newpoint2))
                         _toVisit.Add(newpoint2, currrentdistance + 1);
 
@@ -147,13 +165,13 @@ internal class Program
 
             }
         var newpoint3 = new Point(pos.X + 1, pos.Y);
-        if (InBounds(newpoint))
-            if ((!_blockades.ContainsKey(newpoint3) || pos == startToCheat) && !_visited.ContainsKey(newpoint3))
+        if (InBounds(newpoint3))
+            if ((!_blockades.ContainsKey(newpoint3)) && !_visited.ContainsKey(newpoint3))
             {
 
-                if (_distances[newpoint3].Item2 > currrentdistance + 1)
+                if (_distances[newpoint3] > currrentdistance + 1)
                 {
-                    _distances[newpoint3] = Tuple.Create<Point?, int>(pos, currrentdistance + 1);
+                    _distances[newpoint3] =  currrentdistance + 1;
                     if (!_toVisit.ContainsKey(newpoint3))
                         _toVisit.Add(newpoint3, currrentdistance + 1);
 
@@ -167,20 +185,9 @@ internal class Program
 
     private static bool InBounds(Point newpoint)
     {
-        return (newpoint.X >= 1 && newpoint.Y >= 1 && newpoint.X < _x - 1 && newpoint.Y < _y - 1);
+        return (newpoint.X >= 0 && newpoint.Y >= 0 && newpoint.X < _x  && newpoint.Y < _y);
     }
 
-    public static void printmap(int x, int y)
-    {
-        for (int i = 0; i < y; i++)
-        {
-            for (int j = 0; j < x; j++)
-            {
-                Console.Write(_matrix[j, i]);
-            }
-            Console.WriteLine();
-        }
-    }
 
 
 
