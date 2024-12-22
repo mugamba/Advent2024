@@ -46,7 +46,7 @@ internal class Program
         {
             var result = DoTyping(_numPad, input);
             int i = 0;
-            while (i < 3)
+            while (i < 2)
             {
                 var temp = new List<string>();
                 foreach (var r in result)
