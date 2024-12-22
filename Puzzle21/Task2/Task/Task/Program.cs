@@ -41,10 +41,29 @@ internal class Program
         _keypad.Add(new Point(1, 0), '<');
         _keypad.Add(new Point(1, 2), '>');
 
+        
+
+
         var sum = 0;
         foreach (var input in lines)
         {
             var result = DoTyping(_numPad, input);
+            
+            foreach (var raz in result)
+            {
+                Console.WriteLine(raz + "  ---  " + raz.Length);
+                var d = Splits(raz);
+                Console.Write("Groups ");
+                foreach (var tp in d)
+                    Console.Write(" Key:{0} Count:{1}", tp.Key, tp.Value);
+                Console.WriteLine();
+
+                //var zzzz = DoTyping(_keypad, c);
+
+                //Console.WriteLine("Next Min {0}", zzzz.Select(o => o.Length).Min());
+                //Console.WriteLine("---------------------------------");
+            }
+
             int i = 0;
             while (i < 3)
             {
@@ -52,11 +71,30 @@ internal class Program
                 foreach (var r in result)
                 {
                     var t = DoTyping(_keypad, r);
+
+                    foreach (var c in t)
+                    {
+                        Console.WriteLine(c + "  ---  " + c.Length);
+                        var d = Splits(c);
+                        Console.Write("Groups ");
+                        foreach (var tp in d)
+                            Console.Write(" Key:{0} Count:{1}", tp.Key, tp.Value);
+                        Console.WriteLine();
+
+                        var zzzz = DoTyping(_keypad, c);
+
+                        Console.WriteLine("Next Min {0}", zzzz.Select(o => o.Length).Min());
+                        Console.WriteLine("---------------------------------");
+
+
+
+                    }
+                    
+
                     temp.AddRange(t);
                 }
-                result = temp;
-                i++;
-                var tss = result.Select(o => o.Length).Min();
+               
+               i++;
             }
             sum = sum + result.Select(o => o.Length).Min() * int.Parse(input.Replace("A", ""));
         }
@@ -76,6 +114,7 @@ internal class Program
                 previous = input[i - 1];
 
             char current = input[i];
+
             var templist = Step(inputDict, previous, current);
 
             if (list.Count == 0)
@@ -88,9 +127,11 @@ internal class Program
                     {
                         tt.Add(l + t);
                     }
+
                 list = tt; 
             }
         }
+
         return list;
     }
 
@@ -105,6 +146,22 @@ internal class Program
         
     }
 
+    public static Dictionary<string, long> Splits(String input)
+    {
+        var strings = new List<string>();   
+        for (int i = 0; i < input.Length; i++)
+        {
+            if (i == 0)
+                strings.Add("A" + input[i]);
+            else
+                strings.Add(input[i-1].ToString() + input[i]);
+
+        }
+    
+        return strings.GroupBy(o => o)
+                      .ToDictionary(g => g.Key, g => (long)g.Count());
+
+    }
 
     public static List<String> GetAllPosiblePaths(Dictionary<Point, char> input,  int distance, string currentString, Point step, Point destination)
     {
