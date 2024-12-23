@@ -11,16 +11,40 @@ using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks.Dataflow;
 
 
 internal class Program
 {
     public static Dictionary<Point, char> _keypad = new Dictionary<Point, char>();
     public static Dictionary<Point, char> _numPad = new Dictionary<Point, char>();
+    public static Dictionary<String, List<String>> _dic1 = new Dictionary<string, List<string>>();
+    public static Dictionary<String, List<String>> _dic2 = new Dictionary<string, List<string>>();
+    public static Dictionary<int, String> _tokens = new Dictionary<int, string>();
+
+
     static void Main(string[] args)
     {
         var lines = File.ReadAllLines("input.txt");
         var builder = new StringBuilder();
+
+        _tokens.Add(0, ">A");
+        _tokens.Add(1, "A>");
+        _tokens.Add(2, "Av");
+        _tokens.Add(3, "vA");
+        _tokens.Add(4, "A^");
+        _tokens.Add(5, "^A");
+        _tokens.Add(6, "A<");
+        _tokens.Add(7, "<A");
+        _tokens.Add(8, "<v");
+        _tokens.Add(9, "v<");
+        _tokens.Add(10, "^>");
+        _tokens.Add(11, ">^");
+        _tokens.Add(12, ">v");
+        _tokens.Add(13, "v>");
+        _tokens.Add(14, "AA");
+        _tokens.Add(15, "<<");
+        _tokens.Add(16, ">>");
 
         _numPad.Add(new Point(0, 0), '7');
         _numPad.Add(new Point(0, 1), '8');
@@ -40,64 +64,68 @@ internal class Program
         _keypad.Add(new Point(1, 1), 'v');
         _keypad.Add(new Point(1, 0), '<');
         _keypad.Add(new Point(1, 2), '>');
-
+        File.Delete("text.txt");
         
-
-
         var sum = 0;
         foreach (var input in lines)
         {
             var result = DoTyping(_numPad, input);
-            
-            foreach (var raz in result)
-            {
-                Console.WriteLine(raz + "  ---  " + raz.Length);
-                var d = Splits(raz);
-                Console.Write("Groups ");
-                foreach (var tp in d)
-                    Console.Write(" Key:{0} Count:{1}", tp.Key, tp.Value);
-                Console.WriteLine();
-
-                //var zzzz = DoTyping(_keypad, c);
-
-                //Console.WriteLine("Next Min {0}", zzzz.Select(o => o.Length).Min());
-                //Console.WriteLine("---------------------------------");
-            }
-
             int i = 0;
-            while (i < 3)
+            while (i < 2)
             {
                 var temp = new List<string>();
                 foreach (var r in result)
                 {
-                    var t = DoTyping(_keypad, r);
-
-                    foreach (var c in t)
-                    {
-                        Console.WriteLine(c + "  ---  " + c.Length);
-                        var d = Splits(c);
-                        Console.Write("Groups ");
-                        foreach (var tp in d)
-                            Console.Write(" Key:{0} Count:{1}", tp.Key, tp.Value);
-                        Console.WriteLine();
-
-                        var zzzz = DoTyping(_keypad, c);
-
-                        Console.WriteLine("Next Min {0}", zzzz.Select(o => o.Length).Min());
-                        Console.WriteLine("---------------------------------");
-
-
-
-                    }
                     
+                    var t = DoTyping(_keypad, r);
+                        _dic1.Add(r, t);
+                   
 
                     temp.AddRange(t);
                 }
-               
+                result = temp;
+
                i++;
             }
-            sum = sum + result.Select(o => o.Length).Min() * int.Parse(input.Replace("A", ""));
+            //sum = sum + result.Select(o => o.Length).Min() * int.Parse(input.Replace("A", ""));
         }
+
+        var start = DoTyping(_numPad, "029A").ToList();
+        foreach (var s in start)
+        {
+            File.AppendAllText("text.txt", String.Format("line {0} --- length ({1})", s, s.Length));
+            File.AppendAllText("text.txt", Environment.NewLine);
+            Splits(s);
+
+            File.AppendAllText("text.txt", Environment.NewLine);
+           
+        }
+
+        var keys = _dic1.Where(o => o.Value.Any(o => o.Length == 68)).ToDictionary();
+
+        foreach (var key in keys)
+        {
+            
+            File.AppendAllText("text.txt", String.Format("line {0} --- length ({1})", key.Key, key.Key.Length));
+            File.AppendAllText("text.txt", Environment.NewLine);
+            Splits(key.Key);  
+
+            File.AppendAllText("text.txt", Environment.NewLine);
+
+            foreach (var t in _dic1[key.Key])
+            {
+                //File.AppendAllText("text.txt", "      " + String.Format("line {0} --- length ({1})", t, t.Length));
+                //File.AppendAllText("text.txt", Environment.NewLine);
+                ////Splits(t);
+
+
+                //File.AppendAllText("text.txt", Environment.NewLine);
+            }
+
+
+        }
+
+
         //var result = KeypadForInput(_keypad, "<A^A>^^AvvvA");
         Console.WriteLine(sum);
         Console.ReadKey();
@@ -146,7 +174,7 @@ internal class Program
         
     }
 
-    public static Dictionary<string, long> Splits(String input)
+    public static void Splits(String input)
     {
         var strings = new List<string>();   
         for (int i = 0; i < input.Length; i++)
@@ -158,8 +186,18 @@ internal class Program
 
         }
     
-        return strings.GroupBy(o => o)
+        var dict = strings.GroupBy(o => o)
                       .ToDictionary(g => g.Key, g => (long)g.Count());
+
+
+        foreach (var pair in _tokens)
+        { 
+            if (dict.ContainsKey(pair.Value))
+                File.AppendAllText("text.txt", " " + String.Format(" T:{0} C:{1}", pair.Value, dict[pair.Value]));
+            else
+                File.AppendAllText("text.txt", " " + String.Format(" T:{0} C:{1}", pair.Value, 0));
+        }
+
 
     }
 
@@ -167,7 +205,6 @@ internal class Program
     {
      
         var list = new List<String>();
-
         var newDistance = Math.Abs(step.X - destination.X) + Math.Abs(step.Y - destination.Y);
 
         if (newDistance > distance)
