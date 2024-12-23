@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security;
@@ -18,9 +19,8 @@ internal class Program
 {
     public static Dictionary<Point, char> _keypad = new Dictionary<Point, char>();
     public static Dictionary<Point, char> _numPad = new Dictionary<Point, char>();
-    public static Dictionary<String, List<String>> _dic1 = new Dictionary<string, List<string>>();
-    public static Dictionary<String, List<String>> _dic2 = new Dictionary<string, List<string>>();
-    public static Dictionary<int, String> _tokens = new Dictionary<int, string>();
+    public static Dictionary<string, List<string>> _keypadMemo = new Dictionary<string, List<string>>();
+    
 
 
     static void Main(string[] args)
@@ -28,44 +28,29 @@ internal class Program
         var lines = File.ReadAllLines("input.txt");
         var builder = new StringBuilder();
 
-        _tokens.Add(0, ">A");
-        _tokens.Add(1, "A>");
-        _tokens.Add(2, "Av");
-        _tokens.Add(3, "vA");
-        _tokens.Add(4, "A^");
-        _tokens.Add(5, "^A");
-        _tokens.Add(6, "A<");
-        _tokens.Add(7, "<A");
-        _tokens.Add(8, "<v");
-        _tokens.Add(9, "v<");
-        _tokens.Add(10, "^>");
-        _tokens.Add(11, ">^");
-        _tokens.Add(12, ">v");
-        _tokens.Add(13, "v>");
-        _tokens.Add(14, "AA");
-        _tokens.Add(15, "<<");
-        _tokens.Add(16, ">>");
-
-        _numPad.Add(new Point(0, 0), '7');
-        _numPad.Add(new Point(0, 1), '8');
-        _numPad.Add(new Point(0, 2), '9');
-        _numPad.Add(new Point(1, 0), '4');
-        _numPad.Add(new Point(1, 1), '5');
-        _numPad.Add(new Point(1, 2), '6');
-        _numPad.Add(new Point(2, 0), '1');
-        _numPad.Add(new Point(2, 1), '2');
-        _numPad.Add(new Point(2, 2), '3');
-        _numPad.Add(new Point(3, 1), '0');
-        _numPad.Add(new Point(3, 2), 'A');
+        _keypadMemo.Add("A<", new List<string> { "v<<A", "<v<A" });
+        _keypadMemo.Add("<A", new List<string> { ">>^A", ">^>A" });
+        _keypadMemo.Add("A>", new List<string> { "vA" });
+        _keypadMemo.Add(">A", new List<string> { "^A" });
+        _keypadMemo.Add("Av", new List<string> { "v<A", "<vA" });
+        _keypadMemo.Add("vA", new List<string> { "^>A", ">^A" });
+        _keypadMemo.Add("^A", new List<string> { ">A" });
+        _keypadMemo.Add("A^", new List<string> { "<A" });
+        _keypadMemo.Add("^A", new List<string> { ">A" });
+        _keypadMemo.Add("A^", new List<string> { "<A" });
 
 
-        _keypad.Add(new Point(0, 2), 'A');
-        _keypad.Add(new Point(0, 1), '^');
-        _keypad.Add(new Point(1, 1), 'v');
-        _keypad.Add(new Point(1, 0), '<');
-        _keypad.Add(new Point(1, 2), '>');
-        File.Delete("text.txt");
-        
+        _keypad
+
+
+        _keypadMemo.Add("AA", new List<string> { "A" });
+        _keypadMemo.Add(">>", new List<string> { "A" });
+        _keypadMemo.Add("<<", new List<string> { "A" });
+        _keypadMemo.Add("^^", new List<string> { "A" });
+        _keypadMemo.Add("vv", new List<string> { "A" });
+
+
+
         var sum = 0;
         foreach (var input in lines)
         {
@@ -91,15 +76,24 @@ internal class Program
         }
 
         var start = DoTyping(_numPad, "029A").ToList();
-        foreach (var s in start)
-        {
-            File.AppendAllText("text.txt", String.Format("line {0} --- length ({1})", s, s.Length));
-            File.AppendAllText("text.txt", Environment.NewLine);
-            Splits(s);
 
-            File.AppendAllText("text.txt", Environment.NewLine);
-           
+
+        foreach (var t in start)
+        {
+           var ti =  DoTyping(_keypad, t.Substring(0, 6));
+          var td = DoTyping(_keypad, t.Substring(6, t.Length - 6));
+
         }
+
+        //foreach (var s in start)
+        //{
+        //    File.AppendAllText("text.txt", String.Format("line {0} --- length ({1})", s, s.Length));
+        //    File.AppendAllText("text.txt", Environment.NewLine);
+        //    Splits(s);
+
+        //    File.AppendAllText("text.txt", Environment.NewLine);
+
+        //}
 
         var keys = _dic1.Where(o => o.Value.Any(o => o.Length == 68)).ToDictionary();
 
@@ -131,7 +125,7 @@ internal class Program
         Console.ReadKey();
     }
 
-    private static List<String> DoTyping(Dictionary<Point, char> inputDict, string input)
+    private static List<String> DoTypingKeypad(string input)
     {
         var sb = new StringBuilder();
         var list = new List<String>();
@@ -142,8 +136,7 @@ internal class Program
                 previous = input[i - 1];
 
             char current = input[i];
-
-            var templist = Step(inputDict, previous, current);
+            var templist = Step(_keypad, previous, current);
 
             if (list.Count == 0)
                 list.AddRange(templist);
@@ -159,7 +152,6 @@ internal class Program
                 list = tt; 
             }
         }
-
         return list;
     }
 
