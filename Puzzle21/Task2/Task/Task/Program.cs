@@ -21,7 +21,8 @@ internal class Program
     public static Dictionary<Point, char> _keypad = new Dictionary<Point, char>();
     public static Dictionary<Point, char> _numPad = new Dictionary<Point, char>();
     public static Dictionary<string, List<string>> _keypadMemo = new Dictionary<string, List<string>>();
-    
+    public static Dictionary<Tuple<string, int, bool>, long> _distanceMemo = new Dictionary<Tuple<string, int, bool>, long>();
+
     static void Main(string[] args)
     {
         var lines = File.ReadAllLines("input.txt");
@@ -65,25 +66,12 @@ internal class Program
         _keypadMemo.Add("^^", new List<string> { "A" });
         _keypadMemo.Add("vv", new List<string> { "A" });
 
-        var sum = 0;
+        var sum = 0L;
         foreach (var input in lines)
         {
             var result = DoTypingNumpad( input);
-            int i = 0;
-            while (i < 25)
-            {
-                var temp = new List<string>();
-                foreach (var r in result)
-                {
-                    
-                    var t = DoTypingKeypad("A"+r);
-                    temp.AddRange(t);
-                }
-                result = temp;
-
-               i++;
-            }
-            sum = sum + result.Select(o => o.Length).Min() * int.Parse(input.Replace("A", ""));
+            var t = DoTypingKeypad(result, 0, true);
+            sum = sum + t * long.Parse(input.Replace("A", ""));
         }
 
       
@@ -92,38 +80,43 @@ internal class Program
     }
 
 
-    public static List<string> DoTypingKeypad(string input)
+    public static long DoTypingKeypad(List<string> input, int depth, bool isStartingToken)
     {
-        if (_keypadMemo.ContainsKey(input))
-             return _keypadMemo[input];
+        if (depth == 2)
+            return input.Select(o=>o.Length).Min();
 
-        var result1 = DoTypingKeypad()
-
-
-        var temp = new List<string>();  
-        var builder = new StringBuilder();
-        var array = input.ToCharArray();
-      
-        for (int i=1;i<input.Length; i++) 
+        var tokenMinLength = long.MaxValue;
+        foreach (var token in input)
         {
-            var previous = string.Concat(input[i-1].ToString() + input[i].ToString());
-            builder.Append(previous);
-            if (temp.Count == 0)
+            var test = token;
+            if (isStartingToken)
+                test = "A" + token;
+
+            var ll = 0L; var result = 0L;
+            for (int i = 1; i < test.Length; i++)
             {
-                temp.AddRange(DoTypingKeypad(previous));
+                var previous = string.Concat(test[i - 1].ToString() + test[i].ToString());
+                var isstart = ((i == 1) && isStartingToken);
+
+                if (_distanceMemo.ContainsKey(Tuple.Create(previous, depth, isstart)))
+                    result = _distanceMemo[Tuple.Create(previous, depth, isstart)];
+                else
+                {
+                   result = DoTypingKeypad(_keypadMemo[previous], depth + 1, isstart);
+                    _distanceMemo.Add(Tuple.Create(previous, depth, isstart), result);
+                    
+                }
+                ll = ll + result;
             }
-            else
-            {
-                var r = temp.SelectMany(x => DoTypingKeypad(previous), (x, y) => string.Concat(x, y)).ToList();
-                var min = r.Min(o => o.Length);
-                temp = r.Where(o => o.Length == min).ToList();
-                var current = builder.ToString();
-                if (!_keypadMemo.ContainsKey(current))
-                    _keypadMemo.Add(current, temp);
-            }
+
+            if (ll < tokenMinLength)
+                tokenMinLength = ll;
+
         }
-        return temp; 
+
+        return tokenMinLength;
     }
+       
 
     private static List<String> DoTypingNumpad(string input)
     {
