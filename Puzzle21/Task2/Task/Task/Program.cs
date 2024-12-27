@@ -91,7 +91,7 @@ internal class Program
             var test = token;
                 test = "A" + token;
 
-            var ll = 0L; var result = 0L;
+            var minOfCuurentToken = 0L; var result = 0L;
             for (int i = 1; i < test.Length; i++)
             {
                 var previous = string.Concat(test[i - 1].ToString() + test[i].ToString());
@@ -102,14 +102,11 @@ internal class Program
                 {
                    result = DoTypingKeypad(_keypadMemo[previous], depth + 1);
                     _distanceMemo.Add(Tuple.Create(previous, depth), result);
-                    
                 }
-                ll = ll + result;
+                minOfCuurentToken = minOfCuurentToken + result;
             }
-
-            if (ll < tokenMinLength)
-                tokenMinLength = ll;
-
+            if (minOfCuurentToken < tokenMinLength)
+                tokenMinLength = minOfCuurentToken;
         }
 
         return tokenMinLength;
