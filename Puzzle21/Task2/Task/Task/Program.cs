@@ -21,7 +21,7 @@ internal class Program
     public static Dictionary<Point, char> _keypad = new Dictionary<Point, char>();
     public static Dictionary<Point, char> _numPad = new Dictionary<Point, char>();
     public static Dictionary<string, List<string>> _keypadMemo = new Dictionary<string, List<string>>();
-    public static Dictionary<Tuple<string, int, bool>, long> _distanceMemo = new Dictionary<Tuple<string, int, bool>, long>();
+    public static Dictionary<Tuple<string, int>, long> _distanceMemo = new Dictionary<Tuple<string, int>, long>();
 
     static void Main(string[] args)
     {
@@ -70,7 +70,7 @@ internal class Program
         foreach (var input in lines)
         {
             var result = DoTypingNumpad( input);
-            var t = DoTypingKeypad(result, 0, true);
+            var t = DoTypingKeypad(result, 0);
             sum = sum + t * long.Parse(input.Replace("A", ""));
         }
 
@@ -80,30 +80,28 @@ internal class Program
     }
 
 
-    public static long DoTypingKeypad(List<string> input, int depth, bool isStartingToken)
+    public static long DoTypingKeypad(List<string> input, int depth)
     {
-        if (depth == 2)
+        if (depth == 25)
             return input.Select(o=>o.Length).Min();
 
         var tokenMinLength = long.MaxValue;
         foreach (var token in input)
         {
             var test = token;
-            if (isStartingToken)
                 test = "A" + token;
 
             var ll = 0L; var result = 0L;
             for (int i = 1; i < test.Length; i++)
             {
                 var previous = string.Concat(test[i - 1].ToString() + test[i].ToString());
-                var isstart = ((i == 1) && isStartingToken);
-
-                if (_distanceMemo.ContainsKey(Tuple.Create(previous, depth, isstart)))
-                    result = _distanceMemo[Tuple.Create(previous, depth, isstart)];
+            
+                if (_distanceMemo.ContainsKey(Tuple.Create(previous, depth)))
+                    result = _distanceMemo[Tuple.Create(previous, depth)];
                 else
                 {
-                   result = DoTypingKeypad(_keypadMemo[previous], depth + 1, isstart);
-                    _distanceMemo.Add(Tuple.Create(previous, depth, isstart), result);
+                   result = DoTypingKeypad(_keypadMemo[previous], depth + 1);
+                    _distanceMemo.Add(Tuple.Create(previous, depth), result);
                     
                 }
                 ll = ll + result;
@@ -155,36 +153,7 @@ internal class Program
         var distance = Math.Abs(point.X - point1.X) + Math.Abs(point.Y - point1.Y);
 
         return GetAllPosiblePaths(input, distance, "", point, point1);
-
-        
     }
-
-    //public static void Splits(String input)
-    //{
-    //    var strings = new List<string>();   
-    //    for (int i = 0; i < input.Length; i++)
-    //    {
-    //        if (i == 0)
-    //            strings.Add("A" + input[i]);
-    //        else
-    //            strings.Add(input[i-1].ToString() + input[i]);
-
-    //    }
-    
-    //    var dict = strings.GroupBy(o => o)
-    //                  .ToDictionary(g => g.Key, g => (long)g.Count());
-
-
-    //    foreach (var pair in _tokens)
-    //    { 
-    //        if (dict.ContainsKey(pair.Value))
-    //            File.AppendAllText("text.txt", " " + String.Format(" T:{0} C:{1}", pair.Value, dict[pair.Value]));
-    //        else
-    //            File.AppendAllText("text.txt", " " + String.Format(" T:{0} C:{1}", pair.Value, 0));
-    //    }
-
-
-    //}
 
     public static List<String> GetAllPosiblePaths(Dictionary<Point, char> input,  int distance, string currentString, Point step, Point destination)
     {
